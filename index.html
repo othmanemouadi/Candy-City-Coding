@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Candy City Coding — Python for Kids</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Pyodide (real Python in the browser) -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js"></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🍭</div>
+      <div>
+        <div class="title">Candy City Coding</div>
+        <div class="subtitle">Help RoboPop 🤖 reach the 🏠 Home of Coders by coding in Python!</div>
+      </div>
+    </div>
+
+    <div class="kidbar">
+      <span class="kidLabel">Kid:</span>
+      <select id="kidSelect" class="select"></select>
+      <button id="btnAddKid" class="btn small">+ Add Kid</button>
+      <button id="btnVoice" class="btn small">🔊 Voice Coach</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="play">🎮 Play Story</button>
+    <button class="tab" data-tab="generator">🧩 Puzzle Generator</button>
+    <button class="tab" data-tab="teacher">🧑‍🏫 Teacher Dashboard</button>
+  </nav>
+
+  <main class="layout">
+
+    <!-- PLAY TAB -->
+    <section id="tab-play" class="panel tabPane active">
+      <div class="panelHead">
+        <h2 id="levelTitle">Loading…</h2>
+
+        <div class="panelRight">
+          <span class="pill" id="xpPill">XP: 0</span>
+          <span class="pill" id="badgePill">Badges: 0</span>
+
+          <button id="btnRun" class="btn primary">Run ▶</button>
+          <button id="btnStep" class="btn">Step ⏭</button>
+          <button id="btnReset" class="btn">Reset ↺</button>
+        </div>
+      </div>
+
+      <div class="playGrid">
+        <div class="leftCol">
+          <div class="card">
+            <h3>Story</h3>
+            <p id="storyText"></p>
+            <div class="hintRow">
+              <span class="hintTitle">Hint:</span>
+              <span id="hintText" class="hintText"></span>
+            </div>
+          </div>
+
+          <div class="editorWrap">
+            <div class="editorHead">
+              <div class="editorTitle">Python Code</div>
+              <div class="editorTip">Green lines are valid ✅ • Use loops + variables for more XP</div>
+            </div>
+
+            <!-- Highlight layer behind the textarea -->
+            <div class="editorLayer">
+              <pre id="highlight" class="highlight" aria-hidden="true"></pre>
+              <textarea id="editor" spellcheck="false"></textarea>
+            </div>
+          </div>
+
+          <div class="console">
+            <div class="consoleHead">
+              <h3>Console</h3>
+              <button id="btnClear" class="btn tiny">Clear</button>
+            </div>
+            <div id="consoleLog" class="consoleLog"></div>
+          </div>
+        </div>
+
+        <div class="rightCol">
+          <div class="boardWrap">
+            <canvas id="board" width="520" height="520"></canvas>
+            <div class="boardLegend">
+              <span>⭐ Star</span>
+              <span>🏠 Home of Coders</span>
+              <span>🍬 Wall (blocked)</span>
+              <span>✨🍬 Bonus (flickers, gives XP)</span>
+              <span>🤖 RoboPop</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Badges</h3>
+            <div id="badgesList" class="badgesList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GENERATOR TAB -->
+    <section id="tab-generator" class="panel tabPane">
+      <div class="panelHead">
+        <h2>🧩 Puzzle Generator</h2>
+        <div class="panelRight">
+          <label class="smallLabel">Difficulty</label>
+          <select id="genDifficulty" class="select">
+            <option value="1">Easy</option>
+            <option value="2">Medium</option>
+            <option value="3">Hard</option>
+          </select>
+          <button id="btnGenerate" class="btn primary">Generate</button>
+          <button id="btnPlayGenerated" class="btn">Play This Puzzle</button>
+        </div>
+      </div>
+
+      <div class="genGrid">
+        <div class="card">
+          <h3>Endless practice</h3>
+          <p>
+            This creates a guaranteed path from bottom-left → top-right.
+            It adds candy walls 🍬 and flickering bonus candy ✨🍬.
+          </p>
+          <p class="muted">
+            Bonus candy gives XP when you step on it.
+          </p>
+        </div>
+
+        <div class="boardWrap">
+          <canvas id="genBoard" width="520" height="520"></canvas>
+          <div class="muted" id="genSummary"></div>
+        </div>
+
+        <div class="card">
+          <h3>Starter Code</h3>
+          <pre id="genStarter" class="codeBox"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEACHER TAB -->
+    <section id="tab-teacher" class="panel tabPane">
+      <div class="panelHead">
+        <h2>🧑‍🏫 Teacher Dashboard</h2>
+        <div class="panelRight">
+          <button id="btnExport" class="btn">Export JSON</button>
+          <button id="btnResetAll" class="btn">Reset ALL Progress</button>
+        </div>
+      </div>
+
+      <div class="teacherGrid">
+        <div class="card">
+          <h3>Kids</h3>
+          <div id="kidsTable" class="kidsTable"></div>
+        </div>
+
+        <div class="card">
+          <h3>Notes</h3>
+          <p class="muted">
+            Progress is stored locally (localStorage). Later you can add Firebase to sync across devices.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- STORY MODAL -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modalCard">
+      <div class="modalTitle" id="modalTitle">Story Time</div>
+      <div class="modalBody" id="modalBody"></div>
+      <div class="modalActions">
+        <button id="btnModalSpeak" class="btn">🔊 Read</button>
+        <button id="btnModalClose" class="btn primary">Let’s Code!</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
