@@ -46,3 +46,5 @@ Just open `index.html` in Chrome.
 ### Option B (recommended): run a local server
 ```bash
 python -m http.server 8000
+
+GitHub Pages deployment trigger.
